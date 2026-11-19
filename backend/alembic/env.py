@@ -13,7 +13,7 @@ from app.config import get_settings
 from app.database import Base
 
 # Import models here once they exist (Phase 3) so Alembic can detect changes.
-# from app import models  # noqa: F401
+from app import models  # noqa: F401
 
 config = context.config
 
