@@ -16,11 +16,14 @@ from app.schemas.participations import (
     ParticipationHistoryResponse,
     ParticipationSubmitResult,
     ResponseBatch,
+    QuestionViewResult,
     ResponseSaveResult,
+    ResponsePublic,
 )
 from app.security.dependencies import get_current_user
 from app.services.participations import (
     ParticipationError,
+    record_question_view,
     save_responses,
     start_participation,
     submit_participation,
@@ -50,6 +53,50 @@ def start_survey_participation(
         return start_participation(db, user, survey_id)
     except ParticipationError as exc:
         handle_error(exc)
+
+
+@router.post(
+    "/api/participations/{participation_id}/questions/{question_id}/view",
+    response_model=QuestionViewResult,
+)
+def mark_question_viewed(
+    participation_id: UUID,
+    question_id: UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return record_question_view(db, user, participation_id, question_id)
+    except ParticipationError as exc:
+        handle_error(exc)
+
+
+@router.get(
+    "/api/participations/{participation_id}/responses",
+    response_model=list[ResponsePublic],
+)
+def get_participation_responses(
+    participation_id: UUID,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return saved answers so the frontend can resume at the right question."""
+    from app.models.participations import Participation, Response
+    from sqlalchemy import select as _sel
+
+    participation = db.scalar(
+        _sel(Participation).where(
+            Participation.id == participation_id,
+            Participation.user_id == user.id,
+        )
+    )
+    if participation is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Participation not found.")
+
+    return db.scalars(
+        _sel(Response).where(Response.participation_id == participation.id)
+    ).all()
 
 
 @router.put(

@@ -14,7 +14,7 @@
 }
 .survey-progress-bar span {
   display: block; height: 100%; border-radius: inherit;
-  background: linear-gradient(90deg, var(--dash-primary), #8b84ff);
+  background: linear-gradient(90deg, var(--dash-primary), #ffb17f);
   transition: width .3s ease;
 }
 .survey-progress-label {
@@ -79,7 +79,7 @@
 }
 .text-input:focus, .textarea-input:focus {
   outline: none; border-color: var(--dash-primary);
-  box-shadow: 0 0 0 3px #635bdb18;
+  box-shadow: 0 0 0 3px #f4773518;
 }
 .rating-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .rating-row button {

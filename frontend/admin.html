@@ -20,6 +20,7 @@
         <button class="nav-item" data-view="questions"><span>☷</span> Questions</button>
         <button class="nav-item" data-view="rewards"><span>◈</span> Reward approvals <i id="reward-nav-count">0</i></button>
         <button class="nav-item" data-view="withdrawals"><span>⇄</span> Withdrawals</button>
+        <button class="nav-item" data-view="payments"><span>₣</span> Payments</button>
         <button class="nav-item" data-view="respondents"><span>♙</span> Respondents</button>
       </nav>
       <div class="sidebar-bottom">
@@ -115,6 +116,11 @@
         <div class="section-heading"><div><h2>Withdrawal management</h2><p>Review and process respondent withdrawal requests.</p></div><button class="secondary-button" id="refresh-withdrawals">↻ Refresh</button></div>
         <div class="notice">Follow the payment workflow: approve, mark processing, then mark paid with a payment reference. Rejected requests release the held amount.</div>
         <div class="panel"><div id="withdrawals-table" class="table-wrap"></div></div>
+      </section>
+
+      <section class="view" id="view-payments" hidden>
+        <div class="section-heading"><div><h2>Payment records</h2><p>View M-Pesa subscription payments and their status.</p></div><button class="secondary-button" id="refresh-payments">↻ Refresh</button></div>
+        <div class="panel"><div id="payments-table" class="table-wrap"></div></div>
       </section>
 
       <footer>© <span id="year"></span> SurveyKE · Administrator workspace</footer>

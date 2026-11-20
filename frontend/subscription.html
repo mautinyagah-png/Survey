@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upgrade | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 18px; }
+    .plan { background: var(--dash-card); border: 1px solid var(--dash-line); border-radius: 16px; padding: 24px; position: relative; }
+    .plan.popular { border: 2px solid var(--dash-primary); }
+    .plan.current { border: 2px solid var(--dash-green); }
+    .plan h3 { font: 800 20px "Plus Jakarta Sans",sans-serif; margin: 0 0 6px; }
+    .plan .price { font: 800 30px "Plus Jakarta Sans",sans-serif; margin: 14px 0 4px; }
+    .plan .gap { font-size: 12px; color: var(--dash-muted); margin-bottom: 14px; }
+    .plan .badge { position: absolute; top: 12px; right: 12px; background: var(--dash-primary); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 30px; letter-spacing: 1px; }
+    .plan.current .badge { background: var(--dash-green); }
+    .plan ul { list-style: none; padding: 0; margin: 12px 0 20px; font-size: 13px; color: var(--dash-muted); }
+    .plan li { padding: 6px 0; }
+    .plan li::before { content: "✓ "; color: var(--dash-green); font-weight: 800; }
+    .current-tier { padding: 14px 18px; background: var(--dash-primary-soft); border-radius: 10px; margin-bottom: 24px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="dashboard-main" style="margin:0;padding:30px">
+    <header class="dashboard-header">
+      <div><p class="eyebrow">MEMBERSHIP</p><h1>Upgrade your plan</h1></div>
+      <a class="primary-button" href="dashboard.html">← Back</a>
+    </header>
+    <p class="current-tier" id="current-tier">Loading your current tier…</p>
+    <div class="plan-grid" id="plan-grid"><p class="muted">Loading plans…</p></div>
+  </main>
+  <script src="js/dashboard-config.js"></script>
+  <script>
+    (function () {
+      const API = (window.SURVEY_API_BASE || "").replace(/\/$/, "");
+      const token = sessionStorage.getItem("survey_access_token") || "";
+      if (!token) { window.location.replace("dashboard.html"); return; }
+      const H = { Authorization: "Bearer " + token };
+      const features = {
+        basic: ["Basic-tier surveys"],
+        bronze: ["Everything in Basic", "Bronze-tier surveys"],
+        silver: ["Everything in Bronze", "Silver-tier surveys"],
+        gold: ["Everything in Silver", "Gold-tier surveys"],
+        platinum: ["Everything in Gold", "Platinum-tier surveys", "Full platform access"]
+      };
+
+      let currentTier = "basic";
+      let plans = [];
+
+      function renderPlans() {
+        const grid = document.getElementById("plan-grid");
+        const currentRank = (plans.find(p => p.code === currentTier) || {}).tier_rank || 1;
+        grid.innerHTML = plans.map(p => {
+          const isCurrent = p.code === currentTier;
+          const isPopular = p.code === "gold";
+          const rank = p.tier_rank;
+          const gap = isCurrent ? "" : (rank === currentRank + 1
+            ? `Just KES ${(Number(p.price_amount) - Number(plans[currentRank-1]?.price_amount || 0)).toLocaleString()} more than your current plan`
+            : "");
+          const btn = isCurrent
+            ? `<button class="primary-button" disabled style="width:100%">Current plan</button>`
+            : `<a class="primary-button" href="dashboard.html" style="display:block;text-align:center;width:100%">Choose ${p.name}</a>`;
+          return `
+            <div class="plan ${isCurrent ? "current" : (isPopular ? "popular" : "")}">
+              ${isCurrent ? '<span class="badge">CURRENT</span>' : (isPopular ? '<span class="badge">POPULAR</span>' : "")}
+              <h3>${p.name}</h3>
+              <div class="price">KES ${Number(p.price_amount).toLocaleString()}<span style="font-size:14px;color:var(--dash-muted);font-weight:500"> /mo</span></div>
+              <div class="gap">${gap || (p.price_amount === "0.00" || Number(p.price_amount) === 0 ? "Free forever" : "&nbsp;")}</div>
+              <ul>${features[p.code].map(f => `<li>${f}</li>`).join("")}</ul>
+              ${btn}
+            </div>`;
+        }).join("");
+      }
+
+      Promise.all([
+        fetch(`${API}/api/subscriptions/plans`).then(r => r.json()),
+        fetch(`${API}/api/subscriptions/me`, { headers: H }).then(r => r.ok ? r.json() : Promise.reject())
+      ]).then(([planData, me]) => {
+        plans = planData;
+        currentTier = me.tier || "basic";
+        document.getElementById("current-tier").textContent =
+          `You are currently on the ${me.tier.toUpperCase()} tier (level ${me.tier_rank} of 5).`;
+        renderPlans();
+      }).catch(() => {
+        document.getElementById("plan-grid").innerHTML = '<p class="muted">Could not load plans.</p>';
+      });
+    })();
+  </script>
+</body>
+</html>

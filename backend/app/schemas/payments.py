@@ -38,3 +38,15 @@ class PaymentPage(BaseModel):
 class CheckoutResponse(BaseModel):
     payment: PaymentPublic
     message: str
+
+
+class AdminPaymentPublic(PaymentPublic):
+    user_email: str | None = None
+    user_full_name: str | None = None
+
+
+class AdminPaymentPage(BaseModel):
+    items: list[AdminPaymentPublic]
+    total: int
+    limit: int
+    offset: int

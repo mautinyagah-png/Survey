@@ -90,7 +90,7 @@
     const titles = {
       overview: "Overview", surveys: "Survey management",
       questions: "Question management", rewards: "Reward approvals",
-      withdrawals: "Withdrawal management", respondents: "Respondent management"
+      withdrawals: "Withdrawal management", payments: "Payment records", respondents: "Respondent management"
     };
     document.querySelectorAll(".view").forEach(el => {
       el.hidden = el.id !== `view-${name}`;
@@ -105,6 +105,7 @@
     if (name === "rewards") loadRewards();
     if (name === "withdrawals") loadWithdrawals();
     if (name === "respondents") loadRespondents();
+    if (name === "payments") loadPayments();
   }
 
   function surveyTable(rows, target) {
@@ -526,6 +527,31 @@
     }
   }
 
+  async function loadPayments() {
+    $("payments-table").innerHTML = '<p class="loading">Loading payments...</p>';
+    try {
+      const data = await request("/api/admin/payments?limit=100&offset=0");
+      const rows = data.items || [];
+      if (!rows.length) {
+        $("payments-table").innerHTML = '<p class="empty-state">No payment records yet.</p>';
+        return;
+      }
+      $("payments-table").innerHTML = `<p class="muted">${Number(data.total || rows.length)} payment(s) found.</p>
+        <table><thead><tr><th>Respondent</th><th>Plan</th><th>Amount</th><th>Status</th><th>Receipt</th><th>Created</th></tr></thead><tbody>
+        ${rows.map(p => `<tr>
+          <td><strong>${escapeHTML(p.user_full_name || "—")}</strong><br><small>${escapeHTML(p.user_email || "")}</small></td>
+          <td>#${escapeHTML(String(p.plan_id))}</td>
+          <td>${money(p.amount, p.currency)}</td>
+          <td><span class="status ${escapeHTML(p.status)}">${escapeHTML(p.status)}</span></td>
+          <td>${escapeHTML(p.mpesa_receipt_number || "—")}</td>
+          <td>${new Date(p.created_at).toLocaleString()}</td>
+        </tr>`).join("")}</tbody></table>`;
+    } catch (e) {
+      $("payments-table").innerHTML = `<p class="empty-state">${escapeHTML(e.message)}</p>`;
+      showMessage(e.message, true);
+    }
+  }
+
   async function loadOverview() {
     await Promise.allSettled([loadSurveys(), loadRewards(), loadWithdrawals()]);
   }
@@ -547,6 +573,7 @@
   $("refresh-surveys").addEventListener("click", loadSurveys);
   $("refresh-rewards").addEventListener("click", loadRewards);
   $("refresh-withdrawals").addEventListener("click", loadWithdrawals);
+  $("refresh-payments").addEventListener("click", loadPayments);
   $("refresh-respondents").addEventListener("click", () =>
     loadRespondents($("respondent-search").value)
   );

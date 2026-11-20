@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    .settings-card { max-width: 680px; margin: 0 auto 20px; background: var(--dash-card); border: 1px solid var(--dash-line); border-radius: 16px; padding: 28px; }
+    .settings-card h2 { font: 800 18px "Plus Jakarta Sans",sans-serif; margin: 0 0 18px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--dash-line); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-weight: 600; font-size: 14px; }
+    .setting-desc { font-size: 12px; color: var(--dash-muted); margin-top: 3px; }
+    .theme-btns { display: flex; gap: 8px; }
+    .theme-btns button { border: 1px solid var(--dash-line); background: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .theme-btns button.active { background: var(--dash-primary); color: #fff; border-color: var(--dash-primary); }
+  </style>
+</head>
+<body>
+  <main class="dashboard-main" style="margin:0;padding:30px">
+    <header class="dashboard-header">
+      <div><p class="eyebrow">ACCOUNT</p><h1>Settings</h1></div>
+      <a class="primary-button" href="dashboard.html">← Back</a>
+    </header>
+
+    <div class="settings-card">
+      <h2>Appearance</h2>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Theme</div>
+          <div class="setting-desc">Choose how SurveyKE looks to you</div>
+        </div>
+        <div class="theme-btns" id="theme-btns">
+          <button data-theme="light">Light</button>
+          <button data-theme="dark">Dark</button>
+          <button data-theme="system">System</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h2>Notifications</h2>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Email notifications</div>
+          <div class="setting-desc">Get notified about new surveys and reward approvals</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:46px;height:24px">
+          <input id="email-opt" type="checkbox" checked style="opacity:0;width:0;height:0">
+          <span style="position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:34px;transition:.2s"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Survey reminders</div>
+          <div class="setting-desc">Receive reminders to complete partial surveys</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:46px;height:24px">
+          <input id="reminder-opt" type="checkbox" checked style="opacity:0;width:0;height:0">
+          <span style="position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:34px;transition:.2s"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h2>Account actions</h2>
+      <div class="setting-row" style="cursor:pointer" onclick="window.location.href='profile.html'">
+        <div>
+          <div class="setting-label">Edit profile</div>
+          <div class="setting-desc">Change your name and password</div>
+        </div>
+        <span style="color:var(--dash-muted)">→</span>
+      </div>
+      <div class="setting-row" style="cursor:pointer;color:#b13d3d" onclick="window.location.href='reset.html'">
+        <div>
+          <div class="setting-label">Reset password</div>
+          <div class="setting-desc">Send a reset link to your email</div>
+        </div>
+        <span>→</span>
+      </div>
+    </div>
+  </main>
+  <script src="js/dashboard-config.js"></script>
+  <script src="js/theme.js"></script>
+  <script>
+    (function () {
+      const KEY = "survey.theme";
+      const stored = localStorage.getItem(KEY) || "system";
+      document.querySelectorAll("#theme-btns button").forEach(b => {
+        if (b.dataset.theme === stored) b.classList.add("active");
+        b.addEventListener("click", () => {
+          document.querySelectorAll("#theme-btns button").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+          localStorage.setItem(KEY, b.dataset.theme);
+          const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const resolved = b.dataset.theme === "system" ? (prefersDark ? "dark" : "light") : b.dataset.theme;
+          document.documentElement.setAttribute("data-theme", resolved);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

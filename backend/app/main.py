@@ -24,6 +24,7 @@ from app.routes.wallet import router as wallet_router
 from app.routes.withdrawals import router as withdrawals_router
 from app.routes.notifications import router as notifications_router
 from app.routes.categories import router as categories_router
+from app.routes.admin_payments import router as admin_payments_router
 
 settings = get_settings()
 
@@ -64,6 +65,7 @@ app.include_router(rewards_router)
 app.include_router(withdrawals_router)
 app.include_router(notifications_router)
 app.include_router(categories_router)
+app.include_router(admin_payments_router)
 
 
 @app.get("/api/health", tags=["system"])

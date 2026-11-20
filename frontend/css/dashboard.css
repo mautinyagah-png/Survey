@@ -4,8 +4,8 @@
   --dash-text: #172033;
   --dash-muted: #788397;
   --dash-line: #e8edf4;
-  --dash-primary: #635bdb;
-  --dash-primary-soft: #efedff;
+  --dash-primary: #f47735;
+  --dash-primary-soft: #fff0e8;
   --dash-green: #13865c;
   --dash-orange: #bd741d;
   --dash-shadow: 0 12px 35px rgba(29, 43, 75, .06);
@@ -47,7 +47,7 @@ button { cursor: pointer; }
   width: 100%; padding: 14px; border: 1px solid var(--dash-line);
   border-radius: 10px; outline: none; background: #fbfcfe;
 }
-.auth-card input:focus { border-color: var(--dash-primary); box-shadow: 0 0 0 3px #635bdb18; }
+.auth-card input:focus { border-color: var(--dash-primary); box-shadow: 0 0 0 3px #f4773518; }
 .primary-button {
   border: 0; background: var(--dash-primary); color: white; font-weight: 700;
   border-radius: 10px; padding: 13px 19px;
@@ -83,7 +83,7 @@ button { cursor: pointer; }
 .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--dash-primary-soft); color: var(--dash-primary); display: grid; place-items: center; font-weight: 800; }
 .welcome-panel {
   min-height: 180px; border-radius: 18px; padding: 30px 34px;
-  color: white; background: linear-gradient(115deg, #28265f, #635bdb 75%, #8179ed);
+  color: white; background: linear-gradient(115deg, #17233b, #2f4159 55%, #f47735 130%);
   display: flex; justify-content: space-between; align-items: center; overflow: hidden;
 }
 .welcome-panel .eyebrow { color: #d2d0ff; }

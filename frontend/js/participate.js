@@ -112,6 +112,46 @@
     setProgress(0, questions.length);
   }
 
+  let dwellTimer = null;
+  function clearDwellTimer() {
+    if (dwellTimer) { clearInterval(dwellTimer); dwellTimer = null; }
+  }
+
+  async function startDwellGate(q) {
+    clearDwellTimer();
+    const nextBtn = $("next-button");
+    const label = q ? ` on question ${index + 1}` : "";
+    try {
+      const v = await request(
+        `/api/participations/${participationId}/questions/${q.id}/view`,
+        { method: "POST" }
+      );
+      // Compute remaining from server-returned first_shown_at.
+      const firstShown = Date.parse(v.first_shown_at);
+      const dwell = Number(v.dwell_seconds || 0) * 1000;
+      const until = firstShown + dwell;
+
+      function tick() {
+        const remaining = until - Date.now();
+        if (remaining <= 0) {
+          clearDwellTimer();
+          nextBtn.disabled = false;
+          nextBtn.textContent = index === questions.length - 1 ? "Submit" : "Next";
+          return;
+        }
+        nextBtn.disabled = true;
+        nextBtn.textContent = `Wait ${Math.ceil(remaining / 1000)}s`;
+      }
+      tick();
+      if (!nextBtn.disabled) return; // nothing to wait for
+      dwellTimer = setInterval(tick, 250);
+    } catch (e) {
+      // If the view call fails, do not block the user indefinitely.
+      // Server still enforces dwell on save.
+      nextBtn.disabled = false;
+    }
+  }
+
   function renderQuestion() {
     hideAll();
     $("question-view").hidden = false;
@@ -218,6 +258,7 @@
     $("back-button").disabled = index === 0;
     $("next-button").textContent = index === questions.length - 1 ? "Submit" : "Next";
     setProgress(index + 1, questions.length);
+    startDwellGate(q);
   }
 
   function validate(q) {
@@ -292,12 +333,38 @@
     try {
       const p = await request(`/api/surveys/${survey.id}/participations`, { method: "POST" });
       participationId = p.id;
+
       if (!questions.length) {
         await request(`/api/participations/${participationId}/submit`, { method: "POST" });
         showSubmitted();
         return;
       }
-      index = 0;
+
+      // Resume: load any previously saved answers.
+      let firstUnanswered = 0;
+      try {
+        const saved = await request(`/api/participations/${participationId}/responses`);
+        const byId = {};
+        (saved || []).forEach(r => { byId[r.question_id] = r; });
+        for (let i = 0; i < questions.length; i++) {
+          const q = questions[i];
+          const r = byId[q.id];
+          if (!r) { firstUnanswered = i; break; }
+          if (q.question_type === "single_choice" || q.question_type === "dropdown" || q.question_type === "multi_select") {
+            answers[q.id] = r.selected_option_ids || [];
+          } else if (q.question_type === "rating") {
+            answers[q.id] = r.rating_value;
+          } else {
+            answers[q.id] = r.answer_text;
+          }
+          firstUnanswered = i + 1;
+        }
+        if (firstUnanswered < questions.length) {
+          showMessage(`Resuming — you've completed ${firstUnanswered} of ${questions.length}.`, false);
+        }
+      } catch (_) { /* ignore resume errors, start at 0 */ }
+
+      index = firstUnanswered < questions.length ? firstUnanswered : 0;
       renderQuestion();
     } catch (e) {
       showMessage(e.message || "Could not start this survey.", true);

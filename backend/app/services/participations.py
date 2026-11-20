@@ -7,7 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
-from app.models.participations import Participation, Response
+from app.models.participations import (
+    Participation,
+    ParticipationQuestionView,
+    Response,
+)
 from app.models.surveys import AnswerOption, Survey, SurveyQuestion
 from app.models.identity import User
 from app.models.rewards import RewardRecord, Wallet, WalletTransaction
@@ -379,6 +383,105 @@ def _mark_disqualified(
     db.refresh(participation)
 
 
+def _dwell_seconds() -> int:
+    from app.config import get_settings
+    value = get_settings().question_dwell_seconds
+    return max(0, int(value))
+
+
+def record_question_view(
+    db: Session,
+    user: User,
+    participation_id: UUID,
+    question_id: UUID,
+) -> dict:
+    """Insert-once marker for when a question was first shown to this participation."""
+    participation = _get_owned_participation(db, user, participation_id, lock=False)
+
+    question = db.scalar(
+        select(SurveyQuestion).where(
+            SurveyQuestion.id == question_id,
+            SurveyQuestion.survey_id == participation.survey_id,
+        )
+    )
+    if question is None:
+        raise ParticipationError(
+            "That question does not belong to this survey.", 422
+        )
+
+    existing = db.scalar(
+        select(ParticipationQuestionView).where(
+            ParticipationQuestionView.participation_id == participation.id,
+            ParticipationQuestionView.question_id == question.id,
+        )
+    )
+    if existing is None:
+        now = datetime.now(timezone.utc)
+        view = ParticipationQuestionView(
+            participation_id=participation.id,
+            question_id=question.id,
+            first_shown_at=now,
+        )
+        db.add(view)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            existing = db.scalar(
+                select(ParticipationQuestionView).where(
+                    ParticipationQuestionView.participation_id == participation.id,
+                    ParticipationQuestionView.question_id == question.id,
+                )
+            )
+            if existing is None:
+                raise
+        else:
+            db.refresh(view)
+            existing = view
+
+    dwell = _dwell_seconds()
+    elapsed = (datetime.now(timezone.utc) - existing.first_shown_at).total_seconds()
+    remaining = max(0.0, dwell - elapsed)
+    return {
+        "question_id": existing.question_id,
+        "first_shown_at": existing.first_shown_at,
+        "seconds_visible": elapsed,
+        "dwell_seconds": dwell,
+        "can_proceed": remaining == 0,
+        "seconds_remaining": remaining,
+    }
+
+
+def _enforce_dwell(
+    db: Session,
+    participation_id: UUID,
+    question_id: UUID,
+) -> None:
+    """Raise if the question has not been shown for long enough."""
+    dwell = _dwell_seconds()
+    if dwell <= 0:
+        return
+
+    view = db.scalar(
+        select(ParticipationQuestionView).where(
+            ParticipationQuestionView.participation_id == participation_id,
+            ParticipationQuestionView.question_id == question_id,
+        )
+    )
+    if view is None:
+        raise ParticipationError(
+            "Please view this question before answering.", 409
+        )
+
+    elapsed = (datetime.now(timezone.utc) - view.first_shown_at).total_seconds()
+    if elapsed < dwell:
+        remaining = dwell - elapsed
+        raise ParticipationError(
+            f"Please spend at least {int(remaining) + 1} more second(s) on this question.",
+            422,
+        )
+
+
 def save_responses(
     db: Session,
     user: User,
@@ -417,6 +520,8 @@ def save_responses(
     try:
         for answer in answers:
             question = question_map[answer.question_id]
+            _enforce_dwell(db, participation.id, question.id)
+
             existing = db.scalar(
                 select(Response).where(
                     Response.participation_id == participation.id,
@@ -568,6 +673,10 @@ def submit_participation(
                 f"Please answer the required question: {question.prompt}",
                 422,
             )
+
+    if questions:
+        last_question = max(questions, key=lambda q: q.order_index)
+        _enforce_dwell(db, participation.id, last_question.id)
 
     if (
         survey.participant_target is not None

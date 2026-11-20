@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     access_token_minutes: int = 30
     refresh_token_days: int = 14
 
+    question_dwell_seconds: int = 6
+
     allowed_origins: str = "http://localhost:5500,http://127.0.0.1:5500"
 
     # Daraja credentials are optional until payment checkout is configured.

@@ -112,3 +112,45 @@ class Response(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class ParticipationQuestionView(Base):
+    """Records the first time a question was shown to a participation.
+
+    Written once per (participation, question). Never updated. Used to
+    enforce the minimum dwell requirement server-side; a refreshed page
+    or backward navigation cannot reset first_shown_at.
+    """
+
+    __tablename__ = "participation_question_views"
+    __table_args__ = (
+        UniqueConstraint(
+            "participation_id",
+            "question_id",
+            name="participation_question_views_unique",
+        ),
+        Index(
+            "participation_question_views_lookup_idx",
+            "participation_id",
+            "question_id",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    )
+    participation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("participations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("survey_questions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    first_shown_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )

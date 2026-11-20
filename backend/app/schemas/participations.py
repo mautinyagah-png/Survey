@@ -55,3 +55,23 @@ class ParticipationHistoryResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+
+class QuestionViewResult(BaseModel):
+    question_id: UUID
+    first_shown_at: datetime
+    seconds_visible: float
+    dwell_seconds: int
+    can_proceed: bool
+    seconds_remaining: float
+
+
+
+class ResponsePublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    question_id: UUID
+    answer_text: str | None = None
+    rating_value: int | None = None
+    selected_option_ids: list[UUID] | None = None
