@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notifications | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <main class="dashboard-main" style="margin:0;padding:30px">
+    <header class="dashboard-header">
+      <div><p class="eyebrow">INBOX</p><h1>Notifications</h1></div>
+      <a class="primary-button" href="dashboard.html">← Back</a>
+    </header>
+    <div id="notif-list"><p class="muted">Loading…</p></div>
+  </main>
+  <script src="js/dashboard-config.js"></script>
+  <script>
+    (function () {
+      const API = (window.SURVEY_API_BASE || "").replace(/\/$/, "");
+      const token = sessionStorage.getItem("survey_access_token") || "";
+      const box = document.getElementById("notif-list");
+      if (!token) { window.location.replace("dashboard.html"); return; }
+      function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+      fetch(`${API}/api/notifications/me?limit=50`, { headers: { Authorization: "Bearer " + token }})
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("Failed to load")))
+        .then(data => {
+          if (!data.items.length) { box.innerHTML = '<p class="muted">No notifications yet.</p>'; return; }
+          box.innerHTML = data.items.map(n => `
+            <div class="activity-item" style="margin-bottom:10px;cursor:${n.read_at ? "default" : "pointer"}" data-id="${n.id}" data-read="${!!n.read_at}">
+              <div>
+                <strong>${esc(n.title)}</strong>
+                <small>${esc(n.body || "")} · ${new Date(n.created_at).toLocaleString()}</small>
+              </div>
+              ${n.read_at ? "" : '<span class="status-pill status-submitted">new</span>'}
+            </div>`).join("");
+          box.querySelectorAll('[data-read="false"]').forEach(el => {
+            el.addEventListener("click", () => {
+              fetch(`${API}/api/notifications/${el.dataset.id}/read`, {
+                method: "POST", headers: { Authorization: "Bearer " + token }
+              }).then(() => el.querySelector(".status-pill")?.remove());
+            });
+          });
+        })
+        .catch(err => { box.innerHTML = `<p class="muted">${esc(err.message)}</p>`; });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <main class="dashboard-main" style="margin:0;padding:30px;max-width:720px">
+    <header class="dashboard-header">
+      <div><p class="eyebrow">ACCOUNT</p><h1>My profile</h1></div>
+      <a class="primary-button" href="dashboard.html">← Back</a>
+    </header>
+    <section class="survey-card" style="background:var(--dash-card);border:1px solid var(--dash-line);border-radius:18px;padding:28px">
+      <div id="profile-body"><p class="muted">Loading…</p></div>
+    </section>
+    <section style="margin-top:20px">
+      <h2 style="font:800 16px 'Plus Jakarta Sans',sans-serif;margin-bottom:12px">Change password</h2>
+      <form id="pw-form" class="survey-card" style="background:var(--dash-card);border:1px solid var(--dash-line);border-radius:18px;padding:24px">
+        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Current password</label>
+        <input id="cur-pw" type="password" required style="width:100%;padding:12px;border:1px solid var(--dash-line);border-radius:8px;margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">New password</label>
+        <input id="new-pw" type="password" required minlength="8" style="width:100%;padding:12px;border:1px solid var(--dash-line);border-radius:8px;margin-bottom:14px">
+        <p id="pw-msg" class="message" hidden></p>
+        <button class="primary-button" type="submit" id="pw-btn">Update password</button>
+      </form>
+    </section>
+  </main>
+  <script src="js/dashboard-config.js"></script>
+  <script>
+    (function () {
+      const API = (window.SURVEY_API_BASE || "").replace(/\/$/, "");
+      const token = sessionStorage.getItem("survey_access_token") || "";
+      if (!token) { window.location.replace("dashboard.html"); return; }
+      const H = { Authorization: "Bearer " + token };
+      const body = document.getElementById("profile-body");
+      function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+      fetch(`${API}/api/auth/me`, { headers: H })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("Failed")))
+        .then(u => {
+          body.innerHTML = `
+            <p style="font-size:12px;color:var(--dash-muted);margin:0 0 6px">Full name</p>
+            <p style="font-size:18px;font-weight:700;margin:0 0 18px">${esc(u.full_name)}</p>
+            <p style="font-size:12px;color:var(--dash-muted);margin:0 0 6px">Email</p>
+            <p style="font-size:15px;margin:0 0 18px">${esc(u.email)}</p>
+            <p style="font-size:12px;color:var(--dash-muted);margin:0 0 6px">Role</p>
+            <p style="font-size:15px;margin:0 0 18px;text-transform:capitalize">${esc(u.role || "respondent")}</p>
+            <p style="font-size:12px;color:var(--dash-muted);margin:0 0 6px">Member since</p>
+            <p style="font-size:15px;margin:0">${new Date(u.created_at).toLocaleDateString()}</p>`;
+        })
+        .catch(err => { body.innerHTML = `<p class="muted">${esc(err.message)}</p>`; });
+
+      document.getElementById("pw-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("pw-msg");
+        const btn = document.getElementById("pw-btn");
+        msg.hidden = true; btn.disabled = true;
+        try {
+          const req = await fetch(`${API}/api/auth/password-reset/request`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: (await (await fetch(`${API}/api/auth/me`, {headers:H})).json()).email })
+          });
+          const data = await req.json();
+          if (data.reset_token) {
+            const c = await fetch(`${API}/api/auth/password-reset/confirm`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token: data.reset_token, new_password: document.getElementById("new-pw").value })
+            });
+            if (!c.ok) throw new Error("Password change failed.");
+            msg.textContent = "Password updated."; msg.className = "message"; msg.hidden = false;
+            document.getElementById("pw-form").reset();
+          } else {
+            msg.textContent = "Check your email to finish changing your password."; msg.className = "message"; msg.hidden = false;
+          }
+        } catch (err) {
+          msg.textContent = err.message; msg.className = "message error"; msg.hidden = false;
+        } finally { btn.disabled = false; }
+      });
+    })();
+  </script>
+</body>
+</html>

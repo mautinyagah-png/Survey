@@ -29,7 +29,9 @@
 
         <p id="auth-error" class="message error" role="alert" hidden></p>
         <button class="primary-button full-button" type="submit" id="login-button">Sign in</button>
+        <a href="reset.html" style="display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--dash-muted);text-decoration:none">Forgot password?</a>
       </form>
+      <a class="back-link" href="register.html">New here? Create account →</a>
       <a class="back-link" href="index.html">← Back to homepage</a>
     </section>
     <p class="auth-footnote">Your voice creates value.</p>
@@ -58,6 +60,8 @@
           <p class="eyebrow">RESPONDENT WORKSPACE</p>
           <h1 id="page-title">Overview</h1>
         </div>
+        <a href="profile.html" title="Profile" style="margin-right:10px;font-size:20px;text-decoration:none">👤</a>
+        <a href="notifications.html" title="Notifications" style="margin-left:auto;margin-right:12px;font-size:22px;text-decoration:none">🔔</a>
         <div class="profile-chip">
           <div class="avatar" id="user-avatar">U</div>
           <div><strong id="user-name">Respondent</strong><small id="user-email"></small></div>
@@ -163,6 +167,35 @@
           <strong>How rewards work</strong>
           <p>When you submit an eligible survey, its reward is placed in your pending balance. It becomes available only after administrator approval.</p>
         </div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">WITHDRAW</p><h2>Request a withdrawal</h2></div>
+        </div>
+        <form id="withdraw-form" class="survey-card" style="max-width:none">
+          <div class="form-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+            <label>Amount (KES)<input id="wd-amount" type="number" min="1" step="0.01" required placeholder="e.g. 500"></label>
+            <label>Method
+              <select id="wd-method">
+                <option value="mpesa">M-Pesa</option>
+                <option value="bank_transfer">Bank transfer</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label style="grid-column:1/-1">Destination (masked, e.g. +2547****123)<input id="wd-destination" type="text" required minlength="4" maxlength="120" placeholder="+2547****123"></label>
+          </div>
+          <p id="wd-message" class="message" hidden style="margin-top:12px"></p>
+          <button class="primary-button" type="submit" id="wd-submit" style="margin-top:14px">Request withdrawal</button>
+        </form>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">HISTORY</p><h2>Transaction history</h2></div>
+        </div>
+        <div id="wallet-txns"><p class="muted">Loading transactions...</p></div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">WITHDRAWALS</p><h2>Withdrawal requests</h2></div>
+        </div>
+        <div id="wallet-withdrawals"><p class="muted">Loading withdrawals...</p></div>
       </section>
 
       <footer class="dashboard-footer">© <span id="year"></span> Survey. Research that listens.</footer>

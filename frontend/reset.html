@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reset Password | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="auth-screen">
+    <a class="auth-brand" href="index.html">Survey<span>.</span></a>
+    <section class="auth-card">
+      <div class="auth-symbol">S.</div>
+      <p class="eyebrow">ACCOUNT RECOVERY</p>
+      <h1>Reset your password</h1>
+      <p class="muted">Enter your email to receive reset instructions.</p>
+      <form id="request-form">
+        <label for="req-email">Email address</label>
+        <input id="req-email" type="email" required placeholder="you@example.com">
+        <p id="req-msg" class="message" hidden></p>
+        <button class="primary-button full-button" type="submit" id="req-btn">Send reset link</button>
+      </form>
+
+      <hr style="margin:28px 0;border:0;border-top:1px solid var(--dash-line)">
+
+      <p class="eyebrow">HAVE A TOKEN?</p>
+      <h2 style="font:800 18px 'Plus Jakarta Sans',sans-serif;margin:8px 0 14px">Set new password</h2>
+      <form id="confirm-form">
+        <label for="token">Reset token</label>
+        <input id="token" type="text" required minlength="32" placeholder="Paste your reset token">
+        <label for="new-password">New password</label>
+        <input id="new-password" type="password" required minlength="8" placeholder="At least 8 characters">
+        <p id="confirm-msg" class="message" hidden></p>
+        <button class="primary-button full-button" type="submit" id="confirm-btn">Update password</button>
+      </form>
+
+      <a class="back-link" href="dashboard.html">← Back to sign in</a>
+    </section>
+  </div>
+  <script src="js/dashboard-config.js"></script>
+  <script>
+    (function () {
+      const API = (window.SURVEY_API_BASE || "").replace(/\/$/, "");
+
+      document.getElementById("request-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("req-msg");
+        const btn = document.getElementById("req-btn");
+        msg.hidden = true; btn.disabled = true;
+        try {
+          const res = await fetch(`${API}/api/auth/password-reset/request`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: document.getElementById("req-email").value.trim() })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Request failed.");
+          let text = data.message || "If an eligible account exists, instructions have been generated.";
+          if (data.reset_token) {
+            text += "  (DEV) Token: " + data.reset_token;
+            document.getElementById("token").value = data.reset_token;
+          }
+          msg.textContent = text;
+          msg.className = "message"; msg.hidden = false;
+        } catch (err) {
+          msg.textContent = err.message; msg.className = "message error"; msg.hidden = false;
+        } finally { btn.disabled = false; }
+      });
+
+      document.getElementById("confirm-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("confirm-msg");
+        const btn = document.getElementById("confirm-btn");
+        msg.hidden = true; btn.disabled = true;
+        try {
+          const res = await fetch(`${API}/api/auth/password-reset/confirm`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: document.getElementById("token").value.trim(),
+              new_password: document.getElementById("new-password").value
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Reset failed.");
+          msg.textContent = "Password updated. You can now sign in.";
+          msg.className = "message"; msg.hidden = false;
+          setTimeout(() => window.location.href = "dashboard.html", 1500);
+        } catch (err) {
+          msg.textContent = err.message; msg.className = "message error"; msg.hidden = false;
+        } finally { btn.disabled = false; }
+      });
+    })();
+  </script>
+</body>
+</html>

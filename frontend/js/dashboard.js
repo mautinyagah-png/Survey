@@ -329,6 +329,87 @@
 
   $("year").textContent = new Date().getFullYear();
 
+
+  // --- Wallet data loading (additive) ---
+  async function loadWalletData() {
+    try {
+      const txns = await request("/api/wallet/me/transactions?limit=20&offset=0");
+      const box = $("wallet-txns");
+      if (box) {
+        box.innerHTML = (!txns.items || !txns.items.length)
+          ? '<p class="muted">No transactions yet.</p>'
+          : txns.items.map(t => `
+            <div class="activity-item">
+              <div>
+                <strong>${escapeHTML(String(t.type).replaceAll("_", " "))}</strong>
+                <small>${new Date(t.created_at).toLocaleString()} · ${escapeHTML(t.description || "")}</small>
+              </div>
+              <span class="status-pill">${money(t.amount, t.currency)}</span>
+            </div>`).join("");
+      }
+    } catch (e) {
+      const box = $("wallet-txns");
+      if (box) box.innerHTML = `<p class="muted">${escapeHTML(e.message)}</p>`;
+    }
+
+    try {
+      const wds = await request("/api/wallet/me/withdrawals?limit=20&offset=0");
+      const box = $("wallet-withdrawals");
+      if (box) {
+        box.innerHTML = (!wds.items || !wds.items.length)
+          ? '<p class="muted">No withdrawal requests yet.</p>'
+          : wds.items.map(w => `
+            <div class="activity-item">
+              <div>
+                <strong>${money(w.amount, w.currency)} · ${escapeHTML(w.method)}</strong>
+                <small>${escapeHTML(w.destination_masked)} · ${new Date(w.requested_at).toLocaleString()}</small>
+              </div>
+              <span class="status-pill status-${escapeHTML(w.status)}">${escapeHTML(w.status)}</span>
+            </div>`).join("");
+      }
+    } catch (e) {
+      const box = $("wallet-withdrawals");
+      if (box) box.innerHTML = `<p class="muted">${escapeHTML(e.message)}</p>`;
+    }
+  }
+
+  const wdForm = document.getElementById("withdraw-form");
+  if (wdForm) {
+    wdForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("wd-message");
+      const btn = document.getElementById("wd-submit");
+      msg.hidden = true;
+      btn.disabled = true;
+      try {
+        await request("/api/wallet/me/withdrawals", {
+          method: "POST",
+          body: JSON.stringify({
+            amount: document.getElementById("wd-amount").value,
+            currency: "KES",
+            method: document.getElementById("wd-method").value,
+            destination_masked: document.getElementById("wd-destination").value
+          })
+        });
+        msg.textContent = "Withdrawal request submitted.";
+        msg.className = "message";
+        msg.hidden = false;
+        wdForm.reset();
+        await loadWalletData();
+      } catch (e2) {
+        msg.textContent = e2.message || "Withdrawal failed.";
+        msg.className = "message error";
+        msg.hidden = false;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  document.querySelectorAll('[data-view="wallet"]').forEach((b) => {
+    b.addEventListener("click", () => { loadWalletData(); });
+  });
+
   (async function init() {
     if (!accessToken && refreshToken) {
       await refreshAccessToken();

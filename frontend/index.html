@@ -33,6 +33,9 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/responsive.css" />
+  <style>
+    .survey-grid-home { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -119,6 +122,9 @@
             </a>
             <a class="btn btn--secondary btn--lg" href="#how-it-works">See how it works</a>
           </div>
+          <p style="margin-top:18px;font-size:14px;color:var(--color-text-muted)">
+            New here? <a href="register.html" style="font-weight:600">Create a free account →</a>
+          </p>
           <ul class="hero__points">
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -202,15 +208,8 @@
           <h2>Research published on the platform.</h2>
           <p>This section will list real, database-driven surveys once the survey system is live.</p>
         </div>
-        <div class="empty-state">
-          <span class="empty-state__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="4" width="16" height="16" rx="3" />
-              <path d="M8 10h8M8 14h5" />
-            </svg>
-          </span>
-          <h3>No surveys published yet</h3>
-          <p>The first surveys will appear here once the platform goes live. There are no placeholder listings.</p>
+        <div id="home-surveys" class="survey-grid-home">
+          <p class="muted" style="text-align:center">Loading surveys…</p>
         </div>
       </div>
     </section>
@@ -266,7 +265,7 @@
           </details>
           <details class="faq-item">
             <summary>When will surveys be available?</summary>
-            <p>Survey publishing opens in a later development phase. This page will update automatically once real surveys are published.</p>
+            <p>Surveys are published continuously. Sign in to see what's currently available.</p>
           </details>
         </div>
       </div>
@@ -310,5 +309,32 @@
   <script src="js/theme.js" defer></script>
   <script src="js/navigation.js" defer></script>
   <script src="js/app.js" defer></script>
+  <script>
+    (function () {
+      const API = (window.SURVEY_API_BASE || "https://fluffy-giggle-jjx5j7wxppgqhrpp-8000.app.github.dev").replace(/\/$/, "");
+      const box = document.getElementById("home-surveys");
+      if (!box) return;
+      fetch(`${API}/api/surveys/?page=1&page_size=6`)
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("fetch failed")))
+        .then(data => {
+          const items = (data.items || []).slice(0, 6);
+          if (!items.length) {
+            box.innerHTML = '<p class="muted" style="text-align:center">No surveys are live right now — check back soon.</p>';
+            return;
+          }
+          box.innerHTML = items.map(s => `
+            <article class="survey-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--color-primary);text-transform:uppercase">${s.required_tier}</span>
+              <h3 style="margin:0;font-size:18px">${s.title.replace(/[<>&"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"}[c]))}</h3>
+              <p style="margin:0;color:var(--color-text-muted);font-size:14px">${s.estimated_minutes ? s.estimated_minutes + " min" : "Time varies"}</p>
+              <strong style="color:var(--color-success);font-size:16px">${s.reward_currency} ${Number(s.reward_amount).toLocaleString()}</strong>
+              <a href="dashboard.html" class="btn btn--primary" style="margin-top:6px">Sign in to take part</a>
+            </article>`).join("");
+        })
+        .catch(() => {
+          box.innerHTML = '<p class="muted" style="text-align:center">Surveys couldn\'t load. Please refresh.</p>';
+        });
+    })();
+  </script>
 </body>
 </html>
