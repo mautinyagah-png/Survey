@@ -25,7 +25,7 @@ class Participation(Base):
     __table_args__ = (
         CheckConstraint(
             "status IN ('in_progress', 'submitted', 'under_review', "
-            "'approved', 'rejected', 'cancelled')",
+            "'approved', 'rejected', 'cancelled', 'disqualified')",
             name="participations_status_check",
         ),
         Index(

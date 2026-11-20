@@ -62,6 +62,10 @@ class Survey(Base):
             name="surveys_status_check",
         ),
         CheckConstraint(
+            "required_tier IN ('basic', 'bronze', 'silver', 'gold', 'platinum')",
+            name="surveys_required_tier_check",
+        ),
+        CheckConstraint(
             "participant_target IS NULL OR participant_target > 0",
             name="surveys_participant_target_check",
         ),
@@ -81,6 +85,9 @@ class Survey(Base):
     )
     slug: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     title: Mapped[str] = mapped_column(Text, nullable=False)
+    required_tier: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default=text("'basic'")
+    )
     description: Mapped[str | None] = mapped_column(Text)
     instructions: Mapped[str | None] = mapped_column(Text)
     category_id: Mapped[uuid.UUID | None] = mapped_column(

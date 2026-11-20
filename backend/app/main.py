@@ -12,6 +12,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import engine
 from app.routes.auth import router as auth_router
+from app.routes.admin_users import router as admin_users_router
+from app.routes.participations import router as participations_router
+from app.routes.payments import router as payments_router
+from app.routes.rewards import router as rewards_router
+from app.routes.questions import router as questions_router
+from app.routes.question_bank import router as question_bank_router
+from app.routes.surveys import router as surveys_router
+from app.routes.subscriptions import router as subscriptions_router
+from app.routes.wallet import router as wallet_router
+from app.routes.withdrawals import router as withdrawals_router
 
 settings = get_settings()
 
@@ -40,6 +50,16 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(admin_users_router)
+app.include_router(participations_router)
+app.include_router(questions_router)
+app.include_router(question_bank_router)
+app.include_router(surveys_router)
+app.include_router(subscriptions_router)
+app.include_router(payments_router)
+app.include_router(wallet_router)
+app.include_router(rewards_router)
+app.include_router(withdrawals_router)
 
 
 @app.get("/api/health", tags=["system"])

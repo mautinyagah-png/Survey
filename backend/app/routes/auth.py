@@ -1,11 +1,12 @@
 """HTTP endpoints for user authentication."""
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import get_db
-from app.models.identity import User, UserSession
+from app.models.identity import Role, User, UserSession
 from app.schemas.auth import (
     LoginRequest,
     PasswordResetConfirm,
@@ -107,7 +108,10 @@ def login(
             refresh_token=refresh_token,
             expires_in=settings.access_token_minutes * 60,
         ).model_dump(),
-        "user": UserPublic.model_validate(user).model_dump(mode="json"),
+        "user": {
+            **UserPublic.model_validate(user).model_dump(mode="json"),
+            "role": db.scalar(select(Role.name).where(Role.id == user.role_id)) or "respondent",
+        },
     }
 
 
@@ -137,9 +141,15 @@ def refresh_access_token(
 @router.get("/me", response_model=UserPublic)
 def get_me(
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    """Return the authenticated user's public profile."""
-    return current_user
+    """Return the authenticated user's public profile, including role."""
+    return {
+        **UserPublic.model_validate(current_user).model_dump(mode="json"),
+        "role": db.scalar(
+            select(Role.name).where(Role.id == current_user.role_id)
+        ) or "respondent",
+    }
 
 
 

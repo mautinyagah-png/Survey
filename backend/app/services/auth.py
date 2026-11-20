@@ -16,6 +16,7 @@ from app.models.identity import (
     UserPreference,
     UserSession,
 )
+from app.models.rewards import Wallet
 from app.schemas.auth import RegisterRequest
 from app.security.passwords import hash_password, verify_password
 
@@ -81,6 +82,10 @@ def register_user(
         db.flush()
 
         preferences = UserPreference(user_id=user.id)
+        wallet = Wallet(
+            user_id=user.id,
+            currency=user.preferred_currency or "KES",
+        )
 
         verification = EmailVerification(
             user_id=user.id,
@@ -88,7 +93,7 @@ def register_user(
             expires_at=now + timedelta(hours=24),
         )
 
-        db.add_all([preferences, verification])
+        db.add_all([preferences, verification, wallet])
         db.commit()
         db.refresh(user)
 

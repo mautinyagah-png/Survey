@@ -10,13 +10,21 @@ from app.models.identity import (
     UserSession,
 )
 from app.models.participations import Participation, Response
-from app.models.rewards import RewardRecord, WalletTransaction
+from app.models.question_bank import (
+    QuestionBankOption,
+    QuestionBankQuestion,
+    QuestionBankTitle,
+)
+from app.models.rewards import RewardRecord, Wallet, WalletTransaction
 from app.models.surveys import (
     AnswerOption,
     Survey,
     SurveyCategory,
     SurveyQuestion,
 )
+
+from app.models.subscriptions import SubscriptionPlan, UserSubscription
+
 
 __all__ = [
     "Role",
@@ -26,6 +34,9 @@ __all__ = [
     "PasswordResetToken",
     "UserSession",
     "SurveyCategory",
+    "QuestionBankOption",
+    "QuestionBankQuestion",
+    "QuestionBankTitle",
     "Survey",
     "SurveyQuestion",
     "AnswerOption",
@@ -34,6 +45,12 @@ __all__ = [
     "AuditLog",
     "Notification",
     "WithdrawalRequest",
+    "Wallet",
     "WalletTransaction",
     "RewardRecord",
+    "SubscriptionPlan",
+    "UserSubscription",
+    "Payment",
 ]
+
+from app.models.payments import Payment

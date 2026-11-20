@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>My Dashboard | Survey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <a class="auth-brand" href="index.html">Survey<span>.</span></a>
+    <section class="auth-card">
+      <div class="auth-symbol">S.</div>
+      <p class="eyebrow">WELCOME BACK</p>
+      <h1>Sign in to Survey</h1>
+      <p class="muted">Access your surveys, rewards and account activity.</p>
+
+      <form id="login-form">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
+
+        <p id="auth-error" class="message error" role="alert" hidden></p>
+        <button class="primary-button full-button" type="submit" id="login-button">Sign in</button>
+      </form>
+      <a class="back-link" href="index.html">← Back to homepage</a>
+    </section>
+    <p class="auth-footnote">Your voice creates value.</p>
+  </div>
+
+  <div id="dashboard-screen" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="index.html">Survey<span>.</span></a>
+      <p class="sidebar-label">WORKSPACE</p>
+      <nav class="side-nav">
+        <button class="nav-link active" data-view="overview">▦ <span>Overview</span></button>
+        <button class="nav-link" data-view="surveys">▤ <span>Available surveys</span></button>
+        <button class="nav-link" data-view="activity">◷ <span>My activity</span></button>
+        <button class="nav-link" data-view="wallet">◈ <span>My wallet</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="index.html">← Visit homepage</a>
+        <button id="logout-button" class="logout-button">↪ Sign out</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <button id="menu-button" class="menu-button" aria-label="Toggle navigation">☰</button>
+        <div>
+          <p class="eyebrow">RESPONDENT WORKSPACE</p>
+          <h1 id="page-title">Overview</h1>
+        </div>
+        <div class="profile-chip">
+          <div class="avatar" id="user-avatar">U</div>
+          <div><strong id="user-name">Respondent</strong><small id="user-email"></small></div>
+        </div>
+      </header>
+
+      <div id="dashboard-message" class="message" role="status" hidden></div>
+
+      <section class="view" id="view-overview">
+        <div class="welcome-panel">
+          <div>
+            <p class="eyebrow">YOUR SURVEY JOURNEY</p>
+            <h2>Good to see you, <span id="welcome-name">there</span>.</h2>
+            <p>Discover surveys, share your opinions and track your rewards.</p>
+          </div>
+          <div class="welcome-art" aria-hidden="true">✦</div>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat-card">
+            <span class="stat-icon">◈</span>
+            <p>Available balance</p>
+            <h3 id="available-balance">—</h3>
+            <small>Approved rewards</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon">◷</span>
+            <p>Pending rewards</p>
+            <h3 id="pending-balance">—</h3>
+            <small>Awaiting admin review</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon">▤</span>
+            <p>My participations</p>
+            <h3 id="participation-count">—</h3>
+            <small>All recorded activity</small>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon">♛</span>
+            <p>Membership</p>
+            <h3 id="membership-tier">—</h3>
+            <small id="membership-description">Your access level</small>
+          </article>
+        </div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">DISCOVER</p><h2>Available surveys</h2></div>
+          <button class="text-button" data-go="surveys">View all →</button>
+        </div>
+        <div id="overview-surveys" class="survey-grid">
+          <p class="muted">Loading surveys...</p>
+        </div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR PROGRESS</p><h2>Recent activity</h2></div>
+          <button class="text-button" data-go="activity">View activity →</button>
+        </div>
+        <div id="overview-activity" class="activity-list">
+          <p class="muted">Loading activity...</p>
+        </div>
+      </section>
+
+      <section class="view" id="view-surveys" hidden>
+        <div class="page-intro">
+          <h2>Find your next survey</h2>
+          <p>All published surveys are listed here. Your membership determines which ones you can access.</p>
+        </div>
+        <div id="all-surveys" class="survey-grid">
+          <p class="muted">Loading surveys...</p>
+        </div>
+      </section>
+
+      <section class="view" id="view-activity" hidden>
+        <div class="page-intro">
+          <h2>Your participation history</h2>
+          <p>Track started surveys, submissions and review decisions.</p>
+        </div>
+        <div id="all-activity" class="activity-list">
+          <p class="muted">Loading activity...</p>
+        </div>
+      </section>
+
+      <section class="view" id="view-wallet" hidden>
+        <div class="page-intro">
+          <h2>Your rewards wallet</h2>
+          <p>Submitted survey rewards remain pending until an administrator approves them.</p>
+        </div>
+        <div class="wallet-grid">
+          <article class="wallet-card available">
+            <p>Available balance</p><h2 id="wallet-available">—</h2>
+            <small>Approved and withdrawable, subject to withdrawal rules</small>
+          </article>
+          <article class="wallet-card pending">
+            <p>Pending balance</p><h2 id="wallet-pending">—</h2>
+            <small>Waiting for administrator review</small>
+          </article>
+          <article class="wallet-card earned">
+            <p>Total earned</p><h2 id="wallet-earned">—</h2>
+            <small>Rewards approved to date</small>
+          </article>
+        </div>
+        <div class="notice">
+          <strong>How rewards work</strong>
+          <p>When you submit an eligible survey, its reward is placed in your pending balance. It becomes available only after administrator approval.</p>
+        </div>
+      </section>
+
+      <footer class="dashboard-footer">© <span id="year"></span> Survey. Research that listens.</footer>
+    </main>
+  </div>
+
+  <script src="js/dashboard-config.js"></script>
+  <script src="js/dashboard.js" defer></script>
+</body>
+</html>

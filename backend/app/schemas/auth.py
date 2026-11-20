@@ -68,6 +68,7 @@ class UserPublic(BaseModel):
     id: UUID
     email: EmailStr
     full_name: str
+    role: str = "respondent"
     status: str
     preferred_currency: str
     email_verified_at: datetime | None

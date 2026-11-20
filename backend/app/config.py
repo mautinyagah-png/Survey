@@ -31,6 +31,16 @@ class Settings(BaseSettings):
 
     allowed_origins: str = "http://localhost:5500,http://127.0.0.1:5500"
 
+    # Daraja credentials are optional until payment checkout is configured.
+    mpesa_environment: str = "sandbox"
+    mpesa_consumer_key: str | None = None
+    mpesa_consumer_secret: str | None = None
+    mpesa_shortcode: str | None = None
+    mpesa_passkey: str | None = None
+    mpesa_callback_url: str | None = None
+    mpesa_transaction_type: str = "CustomerPayBillOnline"
+    mpesa_encryption_key: str | None = None
+
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]

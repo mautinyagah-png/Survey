@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SurveyKE | Admin Workspace</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark">S</span><div><strong>SurveyKE</strong><small>ADMIN WORKSPACE</small></div></div>
+      <div class="admin-profile">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div><strong id="admin-name">Administrator</strong><small id="admin-email">Loading profile...</small></div>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="overview"><span>▦</span> Overview</button>
+        <button class="nav-item" data-view="surveys"><span>▤</span> Surveys</button>
+        <button class="nav-item" data-view="questions"><span>☷</span> Questions</button>
+        <button class="nav-item" data-view="rewards"><span>◈</span> Reward approvals <i id="reward-nav-count">0</i></button>
+        <button class="nav-item" data-view="withdrawals"><span>⇄</span> Withdrawals</button>
+        <button class="nav-item" data-view="respondents"><span>♙</span> Respondents</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="dashboard.html">Respondent dashboard ↗</a>
+        <button id="logout-button" class="logout-button">↪ Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="menu-button" class="menu-button" aria-label="Open menu">☰</button>
+        <div><small>ADMINISTRATION</small><h1 id="page-title">Overview</h1></div>
+        <div class="top-actions"><span class="live-dot"></span> Connected workspace</div>
+      </header>
+
+      <div id="page-message" class="message" hidden></div>
+      <div id="loading" class="loading">Loading administrator workspace...</div>
+
+      <section class="view" id="view-overview" hidden>
+        <div class="welcome">
+          <div><span class="eyebrow">SURVEYKE CONTROL CENTRE</span><h2>Welcome back, <span id="welcome-name">Admin</span>.</h2><p>Monitor surveys, reward approvals and withdrawal activity from one place.</p></div>
+          <div class="welcome-icon">⌘</div>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>Total surveys</span><strong id="stat-surveys">—</strong><small>Across all statuses</small></article>
+          <article class="stat-card"><span>Published surveys</span><strong id="stat-published">—</strong><small>Currently published</small></article>
+          <article class="stat-card"><span>Pending rewards</span><strong id="stat-rewards">—</strong><small>Awaiting your review</small></article>
+          <article class="stat-card"><span>Withdrawal requests</span><strong id="stat-withdrawals">—</strong><small>Awaiting review</small></article>
+        </div>
+        <div class="panel">
+          <div class="panel-heading"><div><h3>Recent surveys</h3><p>Latest surveys in your platform</p></div><button class="text-button" data-go="surveys">Manage surveys →</button></div>
+          <div id="overview-surveys" class="table-wrap"></div>
+        </div>
+        <div class="quick-grid">
+          <button class="quick-action" data-go="surveys"><span>＋</span><strong>Create a survey</strong><small>Set up a new questionnaire</small></button>
+          <button class="quick-action" data-go="rewards"><span>◈</span><strong>Review rewards</strong><small>Approve eligible submissions</small></button>
+          <button class="quick-action" data-go="withdrawals"><span>⇄</span><strong>Process withdrawals</strong><small>Review respondent payments</small></button>
+        </div>
+      </section>
+
+      <section class="view" id="view-surveys" hidden>
+        <div class="section-heading"><div><h2>Survey management</h2><p>Create, publish and manage your survey catalogue.</p></div><button class="primary-button" id="show-survey-form">＋ Create survey</button></div>
+        <form id="survey-form" class="panel form-panel" hidden>
+          <div class="panel-heading"><div><h3>Create a survey</h3><p>Complete the details below. New surveys start as drafts.</p></div><button type="button" class="icon-button" id="hide-survey-form">✕</button></div>
+          <div class="form-grid">
+            <label class="full">Survey title<input name="title" required minlength="3" maxlength="200" placeholder="e.g. Household Internet Usage Survey"></label>
+            <label>Membership tier<select name="required_tier"><option value="basic">Basic</option><option value="bronze">Bronze</option><option value="silver">Silver</option><option value="gold">Gold</option><option value="platinum">Platinum</option></select></label>
+            <label>Reward amount (KES)<input name="reward_amount" type="number" min="0" step="0.01" value="0" required></label>
+            <label>Estimated minutes<input name="estimated_minutes" type="number" min="1" max="1440" placeholder="e.g. 5"></label>
+            <label>Country code<input name="country_code" maxlength="2" placeholder="KE"></label>
+            <label class="full">Description<textarea name="description" rows="3" placeholder="Describe the survey..."></textarea></label>
+            <label class="full">Instructions<textarea name="instructions" rows="3" placeholder="Instructions for participants..."></textarea></label>
+            <label>Target audience<input name="target_audience" placeholder="e.g. Adults in Kenya"></label>
+            <label>Participant target<input name="participant_target" type="number" min="1" placeholder="Optional"></label>
+          </div>
+          <div class="form-actions"><button type="button" class="secondary-button" id="cancel-survey">Cancel</button><button class="primary-button" type="submit">Save draft</button></div>
+        </form>
+        <div class="panel"><div class="panel-heading"><div><h3>All surveys</h3><p>Manage survey publication and availability.</p></div><button class="secondary-button" id="refresh-surveys">↻ Refresh</button></div><div id="surveys-table" class="table-wrap"></div></div>
+      </section>
+
+      <section class="view" id="view-questions" hidden>
+        <div class="section-heading"><div><h2>Question management</h2><p>Add and manage questions belonging to a survey.</p></div></div>
+        <div class="panel">
+          <label class="select-survey">Choose survey<select id="question-survey"><option value="">Select a survey</option></select></label>
+          <div id="question-workspace"><p class="empty-state">Choose a survey to view and manage its questions.</p></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-rewards" hidden>
+        <div class="section-heading"><div><h2>Reward approvals</h2><p>Review submitted survey rewards before they become withdrawable.</p></div><button class="secondary-button" id="refresh-rewards">↻ Refresh</button></div>
+        <div class="notice">Approved rewards move from pending balance to available balance. Review each submission before approving.</div>
+        <div class="panel"><div id="rewards-table" class="table-wrap"></div></div>
+      </section>
+
+      <section class="view" id="view-respondents" hidden>
+        <div class="section-heading">
+          <div><h2>Respondent management</h2><p>View respondent accounts and manage account access.</p></div>
+          <button class="secondary-button" id="refresh-respondents">↻ Refresh</button>
+        </div>
+        <div class="panel">
+          <div class="form-grid">
+            <label class="full">Search respondents
+              <input id="respondent-search" type="search" placeholder="Search by name or email">
+            </label>
+          </div>
+          <div id="respondents-table" class="table-wrap">
+            <p class="empty-state">Open this section to load respondent accounts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-withdrawals" hidden>
+        <div class="section-heading"><div><h2>Withdrawal management</h2><p>Review and process respondent withdrawal requests.</p></div><button class="secondary-button" id="refresh-withdrawals">↻ Refresh</button></div>
+        <div class="notice">Follow the payment workflow: approve, mark processing, then mark paid with a payment reference. Rejected requests release the held amount.</div>
+        <div class="panel"><div id="withdrawals-table" class="table-wrap"></div></div>
+      </section>
+
+      <footer>© <span id="year"></span> SurveyKE · Administrator workspace</footer>
+    </main>
+  </div>
+  <script src="js/dashboard-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

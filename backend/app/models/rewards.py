@@ -22,6 +22,59 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 
 
+class Wallet(Base):
+    """Per-user, per-currency wallet balances."""
+
+    __tablename__ = "wallets"
+    __table_args__ = (
+        CheckConstraint(
+            "pending_balance >= 0",
+            name="wallets_pending_balance_check",
+        ),
+        CheckConstraint(
+            "available_balance >= 0",
+            name="wallets_available_balance_check",
+        ),
+        CheckConstraint(
+            "total_earned >= 0",
+            name="wallets_total_earned_check",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "currency",
+            name="wallets_user_currency_key",
+        ),
+        Index("wallets_user_idx", "user_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    currency: Mapped[str] = mapped_column(CHAR(3), nullable=False)
+    pending_balance: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, server_default=text("0")
+    )
+    available_balance: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, server_default=text("0")
+    )
+    total_earned: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, server_default=text("0")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class RewardRecord(Base):
     __tablename__ = "reward_records"
     __table_args__ = (
@@ -90,7 +143,7 @@ class WalletTransaction(Base):
     __tablename__ = "wallet_transactions"
     __table_args__ = (
         CheckConstraint(
-            "type IN ('credit', 'debit', 'hold', 'release')",
+            "type IN ('credit', 'debit', 'hold', 'release', 'pending_credit', 'pending_debit')",
             name="wallet_transactions_type_check",
         ),
         CheckConstraint(
