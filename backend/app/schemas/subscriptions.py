@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 class SubscriptionPlanPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
     code: str
     name: str
     tier_rank: int

@@ -358,14 +358,33 @@
       if (box) {
         box.innerHTML = (!wds.items || !wds.items.length)
           ? '<p class="muted">No withdrawal requests yet.</p>'
-          : wds.items.map(w => `
-            <div class="activity-item">
-              <div>
-                <strong>${money(w.amount, w.currency)} · ${escapeHTML(w.method)}</strong>
-                <small>${escapeHTML(w.destination_masked)} · ${new Date(w.requested_at).toLocaleString()}</small>
-              </div>
-              <span class="status-pill status-${escapeHTML(w.status)}">${escapeHTML(w.status)}</span>
-            </div>`).join("");
+          : wds.items.map(w => {
+              const canCancel = w.status === "requested";
+              return `
+                <div class="activity-item">
+                  <div>
+                    <strong>${money(w.amount, w.currency)} · ${escapeHTML(w.method)}</strong>
+                    <small>${escapeHTML(w.destination_masked)} · ${new Date(w.requested_at).toLocaleString()}</small>
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:center">
+                    <span class="status-pill status-${escapeHTML(w.status)}">${escapeHTML(w.status)}</span>
+                    ${canCancel ? `<button class="withdraw-cancel-btn" data-cancel-wd="${escapeHTML(w.id)}">Cancel</button>` : ""}
+                  </div>
+                </div>`;
+            }).join("");
+        box.querySelectorAll("[data-cancel-wd]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("Cancel this withdrawal request?")) return;
+            btn.disabled = true;
+            try {
+              await request(`/api/wallet/me/withdrawals/${btn.dataset.cancelWd}/cancel`, { method: "POST" });
+              await loadWalletData();
+            } catch (e) {
+              alert(e.message);
+              btn.disabled = false;
+            }
+          });
+        });
       }
     } catch (e) {
       const box = $("wallet-withdrawals");

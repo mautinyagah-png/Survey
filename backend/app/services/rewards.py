@@ -148,6 +148,12 @@ def approve_reward(
         reward.approved_at = now
         reward.updated_at = now
 
+        participation = db.get(Participation, reward.participation_id)
+        if participation is not None:
+            participation.status = "approved"
+            participation.reviewed_at = now
+            participation.updated_at = now
+
         _record_movement(
             db,
             reward,
@@ -194,6 +200,12 @@ def reject_reward(
         reward.status = "rejected"
         reward.rejected_reason = reason
         reward.updated_at = now
+
+        participation = db.get(Participation, reward.participation_id)
+        if participation is not None:
+            participation.status = "rejected"
+            participation.reviewed_at = now
+            participation.updated_at = now
 
         _record_movement(
             db,

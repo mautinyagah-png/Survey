@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment | Survey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/participate.css">
+</head>
+<body>
+  <header class="survey-topbar">
+    <a class="brand" href="dashboard.html">Survey<span>.</span></a>
+    <div style="flex:1"></div>
+    <a href="subscription.html" class="exit-button">← Back</a>
+  </header>
+
+  <main class="survey-main">
+    <div id="payment-message" class="message" hidden></div>
+
+    <section class="survey-card" id="plan-summary">
+      <p class="eyebrow">UPGRADE</p>
+      <h1 id="plan-name">Loading plan…</h1>
+      <p class="muted" style="margin-top:8px">Complete your subscription with M-Pesa.</p>
+      <div id="plan-price" style="font-size:34px;font-weight:800;margin:22px 0 6px;font-family:'Plus Jakarta Sans',sans-serif">—</div>
+      <p class="muted" style="font-size:12px;margin:0">Billed monthly. Cancel anytime.</p>
+    </section>
+
+    <section class="survey-card" id="mpesa-form-wrap" style="margin-top:20px">
+      <h2 style="font:800 18px 'Plus Jakarta Sans',sans-serif;margin:0 0 12px">Pay with M-Pesa</h2>
+      <p class="muted" style="font-size:13px;margin:0 0 18px">Enter your Safaricom M-Pesa number. We'll send an STK prompt to authorize the payment.</p>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#4a566b">M-Pesa number</label>
+      <input id="mpesa-phone" type="tel" placeholder="0712345678 or +254712345678"
+             style="width:100%;padding:14px;border:1px solid var(--dash-line);border-radius:10px;font-size:14px;background:#fbfcfe">
+      <button id="pay-btn" class="primary-button" style="width:100%;margin-top:16px;padding:14px;font-size:15px">Send STK push</button>
+      <p style="font-size:11px;color:var(--dash-muted);margin-top:14px;text-align:center">🔒 Secure payment via Safaricom Daraja</p>
+    </section>
+
+    <section class="survey-card" id="pending-state" hidden style="margin-top:20px;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">📱</div>
+      <h2 style="font:800 20px 'Plus Jakarta Sans',sans-serif;margin:0 0 8px">Check your phone</h2>
+      <p class="muted">Enter your M-Pesa PIN on the prompt that just appeared.</p>
+      <p class="muted" style="font-size:12px">Waiting for confirmation…</p>
+    </section>
+
+    <section class="survey-card" id="success-state" hidden style="margin-top:20px;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <h2 style="font:800 20px 'Plus Jakarta Sans',sans-serif;margin:0 0 8px">Payment successful</h2>
+      <p class="muted">Your subscription is now active.</p>
+      <a href="dashboard.html" class="primary-button" style="display:inline-block;margin-top:16px;padding:12px 24px;border-radius:10px">Back to dashboard</a>
+    </section>
+  </main>
+
+  <script src="js/dashboard-config.js"></script>
+  <script src="js/payment.js" defer></script>
+</body>
+</html>

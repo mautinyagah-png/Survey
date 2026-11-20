@@ -112,9 +112,26 @@ button { cursor: pointer; }
 .activity-item strong { display: block; line-height: 1.5; }
 .activity-item small { display: block; color: var(--dash-muted); margin-top: 5px; }
 .status-pill { font-size: 10px; font-weight: 800; text-transform: uppercase; border-radius: 30px; padding: 7px 10px; background: #edf0f5; color: #667085; white-space: nowrap; }
-.status-approved { background: #e4f7ed; color: #147a4c; }
-.status-submitted, .status-under_review { background: #fff3df; color: #a66a1b; }
+.status-approved, .status-paid, .status-completed { background: #e4f7ed; color: #147a4c; }
+.status-submitted, .status-under_review, .status-requested, .status-pending { background: #fff3df; color: #a66a1b; }
 .status-rejected, .status-disqualified { background: #ffeded; color: #b13d3d; }
+.status-processing { background: #e3efff; color: #2b6cb0; }
+.status-cancelled { background: #f0f2f6; color: #657084; }
+
+/* Withdraw polish */
+#wd-submit {
+  background: linear-gradient(135deg, var(--dash-primary), #e05e1e);
+  box-shadow: 0 6px 18px -8px rgba(244,119,53,.55);
+  padding: 14px 26px; font-size: 14px; border-radius: 10px;
+  font-weight: 700; color: #fff; border: none; transition: transform .15s, box-shadow .15s;
+}
+#wd-submit:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -8px rgba(244,119,53,.65); }
+.withdraw-cancel-btn {
+  border: 1px solid #f6d2bf; color: #d95f24; background: #fff;
+  padding: 8px 14px; border-radius: 8px; font-size: 12px;
+  font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.withdraw-cancel-btn:hover { background: #fff5ed; }
 .page-intro { margin: 10px 0 25px; }
 .page-intro p { color: var(--dash-muted); line-height: 1.7; }
 .wallet-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }

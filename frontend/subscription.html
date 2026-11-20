@@ -60,9 +60,12 @@
           const gap = isCurrent ? "" : (rank === currentRank + 1
             ? `Just KES ${(Number(p.price_amount) - Number(plans[currentRank-1]?.price_amount || 0)).toLocaleString()} more than your current plan`
             : "");
+          const isFree = Number(p.price_amount) === 0;
           const btn = isCurrent
             ? `<button class="primary-button" disabled style="width:100%">Current plan</button>`
-            : `<a class="primary-button" href="dashboard.html" style="display:block;text-align:center;width:100%">Choose ${p.name}</a>`;
+            : isFree
+              ? `<button class="primary-button" disabled style="width:100%;opacity:.55">Free plan</button>`
+              : `<a class="primary-button" href="payment.html?plan=${p.id}" style="display:block;text-align:center;width:100%">Choose ${p.name}</a>`;
           return `
             <div class="plan ${isCurrent ? "current" : (isPopular ? "popular" : "")}">
               ${isCurrent ? '<span class="badge">CURRENT</span>' : (isPopular ? '<span class="badge">POPULAR</span>' : "")}
