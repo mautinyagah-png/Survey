@@ -11,6 +11,9 @@ from app.models.administration import AuditLog, WithdrawalRequest
 from app.models.identity import User
 from app.models.rewards import Wallet, WalletTransaction
 
+MIN_WITHDRAWAL = Decimal("2500.00")
+WITHDRAWAL_FEE_RATE = Decimal("0.10")
+
 
 def _now():
     return datetime.now(timezone.utc)
@@ -60,8 +63,16 @@ def create_withdrawal(
         if amount <= Decimal("0.00"):
             raise ValueError("Withdrawal amount must be greater than zero.")
 
+        if amount < MIN_WITHDRAWAL:
+            raise ValueError(
+                f"Minimum withdrawal is KES {MIN_WITHDRAWAL:,.2f}."
+            )
+
         if wallet.available_balance < amount:
             raise ValueError("Insufficient withdrawable balance.")
+
+        fee = (amount * WITHDRAWAL_FEE_RATE).quantize(Decimal("0.01"))
+        net = (amount - fee).quantize(Decimal("0.01"))
 
         now = _now()
         wallet.available_balance -= amount
@@ -89,7 +100,10 @@ def create_withdrawal(
                 currency=currency,
                 reference_type="withdrawal",
                 reference_id=withdrawal.id,
-                description="Funds reserved for a withdrawal request.",
+                description=(
+                f"Withdrawal hold. Fee: KES {fee:,.2f} "
+                f"(10%). Net payout: KES {net:,.2f}."
+            ),
             )
         )
 

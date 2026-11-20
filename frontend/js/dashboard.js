@@ -394,11 +394,46 @@
 
   const wdForm = document.getElementById("withdraw-form");
   if (wdForm) {
+    // Live fee preview
+    const amtInput = document.getElementById("wd-amount");
+    const preview = document.createElement("p");
+    preview.style.cssText = "font-size:13px;color:var(--dash-muted);margin:6px 0 0;grid-column:1/-1";
+    preview.textContent = "Minimum withdrawal: KES 2,500. Fee: 10% of amount.";
+    amtInput.parentElement.appendChild(preview);
+
+    function updatePreview() {
+      const v = Number(amtInput.value || 0);
+      if (!v) {
+        preview.textContent = "Minimum withdrawal: KES 2,500. Fee: 10% of amount.";
+        preview.style.color = "var(--dash-muted)";
+        return;
+      }
+      if (v < 2500) {
+        preview.textContent = `Amount too low — minimum is KES 2,500.`;
+        preview.style.color = "#b13d3d";
+        return;
+      }
+      const fee = (v * 0.10).toFixed(2);
+      const net = (v - v * 0.10).toFixed(2);
+      preview.textContent = `You'll receive KES ${Number(net).toLocaleString()} (fee: KES ${Number(fee).toLocaleString()}).`;
+      preview.style.color = "var(--dash-green)";
+    }
+    amtInput.addEventListener("input", updatePreview);
+
     wdForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const msg = document.getElementById("wd-message");
       const btn = document.getElementById("wd-submit");
       msg.hidden = true;
+
+      const amt = Number(document.getElementById("wd-amount").value || 0);
+      if (amt < 2500) {
+        msg.textContent = "Minimum withdrawal is KES 2,500.";
+        msg.className = "message error";
+        msg.hidden = false;
+        return;
+      }
+
       btn.disabled = true;
       try {
         await request("/api/wallet/me/withdrawals", {
