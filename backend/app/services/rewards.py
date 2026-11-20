@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.administration import Notification
 from app.models.identity import User
 from app.models.participations import Participation
 from app.models.rewards import RewardRecord, Wallet, WalletTransaction
@@ -154,6 +155,14 @@ def approve_reward(
             participation.reviewed_at = now
             participation.updated_at = now
 
+        db.add(Notification(
+            user_id=reward.user_id,
+            type="reward_approved",
+            title="Reward approved",
+            body=f"Your survey reward of {reward.currency} {reward.amount} has been approved and is now in your available balance.",
+            link="dashboard.html",
+        ))
+
         _record_movement(
             db,
             reward,
@@ -206,6 +215,14 @@ def reject_reward(
             participation.status = "rejected"
             participation.reviewed_at = now
             participation.updated_at = now
+
+        db.add(Notification(
+            user_id=reward.user_id,
+            type="reward_rejected",
+            title="Reward rejected",
+            body=f"Your survey reward was rejected. Reason: {reason}",
+            link="dashboard.html",
+        ))
 
         _record_movement(
             db,
