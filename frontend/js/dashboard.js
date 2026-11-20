@@ -143,7 +143,7 @@
             <span>${locked ? "Upgrade required" : "Available to you"}</span>
           </div>
           <p class="survey-reward">${money(survey.reward_amount, survey.reward_currency)}</p>
-          ${locked ? `<p class="locked-note">Requires ${tier} membership or higher.</p>` : ""}
+          ${locked ? `<p class="locked-note">Requires ${tier} membership or higher.</p>` : `<a href="participate.html?survey=${encodeURIComponent(survey.id)}" style="display:inline-block;margin-top:14px;padding:10px 18px;border-radius:8px;background:var(--dash-primary);color:#fff;font-weight:700;text-decoration:none;font-size:13px">Participate →</a>`}
         </article>`;
     }).join("");
   }

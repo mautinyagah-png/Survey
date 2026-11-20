@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Take Survey | Survey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/participate.css">
+</head>
+<body>
+  <header class="survey-topbar">
+    <a class="brand" href="dashboard.html">Survey<span>.</span></a>
+    <div class="survey-progress-wrap">
+      <div class="survey-progress-bar"><span id="progress-fill" style="width:0%"></span></div>
+      <p class="survey-progress-label" id="progress-label">Loading…</p>
+    </div>
+    <button id="exit-button" class="exit-button" type="button">Exit</button>
+  </header>
+
+  <main class="survey-main">
+    <div id="survey-message" class="message" role="status" hidden></div>
+
+    <section id="survey-loading" class="survey-loading">Loading survey…</section>
+
+    <section id="survey-info" class="survey-card" hidden>
+      <p class="eyebrow">SURVEY</p>
+      <h1 id="survey-title">—</h1>
+      <p class="muted" id="survey-description"></p>
+      <div class="survey-meta">
+        <span id="survey-minutes">—</span>
+        <span id="survey-reward">—</span>
+        <span id="survey-tier">—</span>
+      </div>
+      <div id="survey-instructions-wrap" hidden>
+        <h3>Instructions</h3>
+        <p id="survey-instructions"></p>
+      </div>
+      <button id="start-button" class="primary-button">Start survey</button>
+    </section>
+
+    <section id="question-view" hidden>
+      <div class="question-card">
+        <p class="eyebrow" id="question-counter">Question 1</p>
+        <h2 id="question-prompt">—</h2>
+        <p class="muted" id="question-help" hidden></p>
+        <div id="question-controls"></div>
+      </div>
+      <div class="question-actions">
+        <button id="back-button" class="secondary-button" type="button">Back</button>
+        <button id="next-button" class="primary-button" type="button">Next</button>
+      </div>
+    </section>
+
+    <section id="submitted-view" class="survey-card" hidden>
+      <h2>Submission received</h2>
+      <p id="submitted-message" class="muted"></p>
+      <p class="muted">Your reward is now <strong>pending</strong> until an administrator reviews your submission.</p>
+      <a href="dashboard.html" class="primary-button">Back to dashboard</a>
+    </section>
+
+    <section id="disqualified-view" class="survey-card" hidden>
+      <h2>Not eligible</h2>
+      <p id="disqualified-message" class="muted"></p>
+      <a href="dashboard.html" class="primary-button">Back to dashboard</a>
+    </section>
+  </main>
+
+  <script src="js/dashboard-config.js"></script>
+  <script src="js/participate.js" defer></script>
+</body>
+</html>
